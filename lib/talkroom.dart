@@ -37,7 +37,7 @@ class TalkRoomPage extends StatelessWidget {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('posts')
+                    .collection('rooms')
                     .orderBy('date')
                     .snapshots(),
                 builder: (context, snapshot) {
@@ -49,9 +49,15 @@ class TalkRoomPage extends StatelessWidget {
                       children: documents.map((document) {
                         return Card(
                           child: ListTile(
-                            title: Text(document['text']),
-                            subtitle: Text(document['email']),
-                          ),
+                              title: Text(document['text']),
+                              subtitle: Text(document['email']),
+                              onTap: () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context) {
+                                    return Chat(user, document.id);
+                                  }),
+                                );
+                              }),
                         );
                       }).toList(),
                     );
@@ -62,17 +68,6 @@ class TalkRoomPage extends StatelessWidget {
                 }),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () async {
-          // 投稿画面に遷移
-          await Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) {
-              return Chat(user);
-            }),
-          );
-        },
       ),
     );
   }
