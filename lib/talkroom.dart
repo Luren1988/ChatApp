@@ -28,6 +28,29 @@ class TalkRoomPage extends StatelessWidget {
           ),
         ],
       ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Row(
+                  children: [
+                    Text('メニュー', style: TextStyle(fontSize: 20)),
+                  ],
+                )),
+            ListTile(
+              title: Text('Search'),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Text('Info'),
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           Container(
