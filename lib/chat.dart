@@ -35,6 +35,7 @@ class _ChatState extends State<Chat> {
                 child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('chats')
+                        .where('roomId', isEqualTo: widget.roomId)
                         .orderBy('dates')
                         .snapshots(),
                     builder: (context, snapshot) {
@@ -66,13 +67,6 @@ class _ChatState extends State<Chat> {
                                 ],
                               )),
                             );
-                            // return Card(
-                            //   child: ListTile(
-                            //     title: Text(document["text"]),
-                            //     subtitle: Text(formmeter
-                            //         .format(DateTime.parse(document['dates']))),
-                            //   ),
-                            // );
                           }).toList(),
                         );
                       }

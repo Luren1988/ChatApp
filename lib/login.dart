@@ -1,5 +1,6 @@
 // ログイン画面用Widget
 import 'package:chatapp/talkroom.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -52,6 +53,15 @@ class _LoginPageState extends State<LoginPage> {
                           email: email,
                           password: password,
                         );
+
+                        await FirebaseFirestore.instance
+                            .collection('user')
+                            .doc(result.user?.uid)
+                            .set({
+                          'userId': result.user?.uid,
+                          'name': "No Name",
+                          'user': "",
+                        });
 
                         await Navigator.of(context).pushReplacement(
                             MaterialPageRoute(builder: (context) {

@@ -1,19 +1,21 @@
 // チャット画面用Widget
 import 'package:chatapp/chat.dart';
 import 'package:chatapp/login.dart';
-import 'package:chatapp/search_friend.dart';
+import 'package:chatapp/profile.dart';
+import 'package:chatapp/qr_show.dart';
+import 'package:chatapp/talkroom.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class TalkRoomPage extends StatelessWidget {
-  TalkRoomPage(this.user);
+class SearchPage extends StatelessWidget {
+  SearchPage(this.user);
   final User user;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('チャット'),
+        title: Text('Search'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.logout),
@@ -61,7 +63,12 @@ class TalkRoomPage extends StatelessWidget {
             ),
             ListTile(
               title: Text('Info'),
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context)
+                    .pushReplacement(MaterialPageRoute(builder: (context) {
+                  return ProfilePage(user);
+                }));
+              },
             ),
           ],
         ),
@@ -69,15 +76,19 @@ class TalkRoomPage extends StatelessWidget {
       body: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(8),
-            child: Text('ログイン情報:${user.email}'),
-          ),
+              padding: EdgeInsets.all(8),
+              child: Column(
+                children: [
+                  TextField(
+                    decoration: InputDecoration(
+                        border: InputBorder.none, hintText: 'Search'),
+                  ),
+                ],
+              )),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('rooms')
-                    .where('inPerson', arrayContains: user.uid)
-                    .snapshots(),
+                stream:
+                    FirebaseFirestore.instance.collection('user').snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     final List<DocumentSnapshot> documents =
@@ -87,12 +98,30 @@ class TalkRoomPage extends StatelessWidget {
                       children: documents.map((document) {
                         return Card(
                           child: ListTile(
-                              title: Text(document['text']),
-                              //subtitle: Text(document['email']),
+                              title: Text(document['name']),
+                              subtitle: Text(document['userId']),
+                              trailing: Icon(Icons.add),
                               onTap: () async {
+                                final date =
+                                    DateTime.now().toLocal().toIso8601String();
+                                final id = FirebaseFirestore.instance
+                                    .collection('rooms')
+                                    .doc()
+                                    .id;
+
+                                await FirebaseFirestore.instance
+                                    .collection('rooms')
+                                    .doc(id)
+                                    .set({
+                                  'date': date,
+                                  'roomId': id,
+                                  'text': document['name'] + "ROOM",
+                                  'inPerson': [document['userId'], user.uid]
+                                });
+
                                 await Navigator.of(context).push(
                                   MaterialPageRoute(builder: (context) {
-                                    return Chat(user, document.id);
+                                    return Chat(user, id);
                                   }),
                                 );
                               }),
@@ -107,6 +136,17 @@ class TalkRoomPage extends StatelessWidget {
           ),
         ],
       ),
+      persistentFooterButtons: [
+        IconButton(
+            icon: Icon(Icons.qr_code),
+            onPressed: () {
+              Navigator.of(context)
+                  .pushReplacement(MaterialPageRoute(builder: (context) {
+                return QrCodePage(user);
+              }));
+            }),
+        IconButton(icon: Icon(Icons.camera_alt), onPressed: () {}),
+      ],
     );
   }
 }
